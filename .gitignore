@@ -3,3 +3,6 @@
 
 # Ignore ide config directory
 .idea
+
+# Ignore real .env file
+.env
