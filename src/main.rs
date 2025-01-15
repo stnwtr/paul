@@ -1,9 +1,3 @@
-fn main() {
-}
-
-async fn create_interaction_response() {
-}
-
 // // use poise::serenity_prelude as serenity;
 // //
 // // struct Data {} // User data, which is stored and accessible in all command invocations
@@ -48,114 +42,139 @@ async fn create_interaction_response() {
 // //
 // // https://discord.com/oauth2/authorize?client_id=1326298038939025559
 // 
-// use std::fs;
-// use std::time::Duration;
-// use reqwest::blocking::Body;
-// use reqwest::blocking::multipart::Part;
-// use reqwest::header::HeaderMap;
-// use serenity::builder::*;
-// use serenity::interactions_endpoint::Verifier;
-// use serenity::json;
-// use serenity::model::application::*;
-// 
-// type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
-// 
-// fn handle_command(interaction: CommandInteraction) -> CreateInteractionResponse {
-//     let interaction_token = interaction.token.to_owned();
-//     let interaction_id = interaction.id.to_string();
-//     let application_id = interaction.application_id.to_string();
-// 
-//     std::thread::spawn(move || {
-//         std::thread::sleep(std::time::Duration::from_secs(1));
-//         follow_up(interaction_token.as_str(), interaction_id.as_str(), application_id.as_str());
-//     });
-// 
-//     CreateInteractionResponse::Defer(CreateInteractionResponseMessage::new().content("Hey"))
-// }
-// 
-// fn handle_request(
-//     mut request: tiny_http::Request,
-//     body: &mut Vec<u8>,
-//     verifier: &Verifier,
-// ) -> Result<(), Error> {
-//     println!("Received request from {:?}", request.remote_addr());
-// 
-//     // Read the request body (containing the interaction JSON)
-//     body.clear();
-//     request.as_reader().read_to_end(body)?;
-// 
-//     // Reject request if it fails cryptographic verification
-//     // Discord rejects the interaction endpoints URL if this check is not done
-//     // (This part is very specific to your HTTP server crate of choice, so serenity cannot abstract
-//     // away the boilerplate)
-//     let find_header =
-//         |name| Some(request.headers().iter().find(|h| h.field.equiv(name))?.value.as_str());
-//     let signature = find_header("X-Signature-Ed25519").ok_or("missing signature header")?;
-//     let timestamp = find_header("X-Signature-Timestamp").ok_or("missing timestamp header")?;
-//     if verifier.verify(signature, timestamp, body).is_err() {
-//         request.respond(tiny_http::Response::empty(401))?;
-//         return Ok(());
-//     }
-// 
-//     // Build Discord response
-//     let response = match json::from_slice::<Interaction>(body)? {
-//         // Discord rejects the interaction endpoints URL if pings are not acknowledged
-//         Interaction::Ping(_) => CreateInteractionResponse::Pong,
-//         Interaction::Command(interaction) => handle_command(interaction),
-//         _ => return Ok(()),
-//     };
-// 
-//     // Send the Discord response back via HTTP
-//     request.respond(
-//         tiny_http::Response::from_data(json::to_vec(&response)?)
-//             .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap()),
-//     )?;
-// 
-//     Ok(())
-// }
-// 
-// fn main() -> Result<(), Error> {
-//     // Change this string to the Public Key value in your bot dashboard
-//     let verifier =
-//         Verifier::new("7d2b7d9084b7dafe913a2b86f88e12f42d99dfacb49420c47cb51455edfa6dcd");
-// 
-//     // Setup an HTTP server and listen for incoming interaction requests
-//     // Choose any port here (but be consistent with the interactions endpoint URL in your bot
-//     // dashboard)
-//     let server = tiny_http::Server::http("0.0.0.0:8787")?;
-//     let mut body = Vec::new();
-//     loop {
-//         let request = server.recv()?;
-//         if let Err(e) = handle_request(request, &mut body, &verifier) {
-//             eprintln!("Error while handling request: {e}");
-//         }
-//     }
-// }
-// 
-// fn follow_up(interaction_token: &str, interaction_id: &str, application_id: &str) {
-//     let base = "https://discord.com/api/v10";
-// 
-//     let patch = format!("{}/webhooks/{}/{}/messages/@original", base, application_id, interaction_token);
-//     let post = format!("{}/webhooks/{}/{}", base, application_id, interaction_token);
-// 
-//     let create_message_body = r#"{"content": "Congrats on sending your command!", "attachments": [{"id": 0, "description": "imagea of reyna valorant", "url": "https://cdn.discordapp.com/attachments/542675523583737856/1328679245966479371/reyna.png?ex=67879479&is=678642f9&hm=36e37484a7aa7572f7242c58885dd552d63276a9f864d4d237b6bf67c4d5ad58&"}]}"#;
-//     let create_message_body = r#"{"content": "Congrats on sending your command!", "attachments": [{"id": 0, "description": "imagea of reyna valorant", "url": "wtf"}]}"#;
-// 
-//     //
-//     let file_path = "/home/stnwtr/Downloads/reyna.png";
-//     let form = reqwest::blocking::multipart::Form::new()
-//         .part("payload_json", Part::text(create_message_body).mime_str("application/json").unwrap())
-//         .part("files[0]", Part::file(file_path).unwrap());
-//     // 
-// 
-//     let response = reqwest::blocking::Client::new()
-//         .patch(patch)
-//         .multipart(form)
-//         .send()
-//         .unwrap();
-// 
-//     println!("Response: {}", response.text().unwrap());
-// }
+use std::fs;
+use std::time::Duration;
+use reqwest::blocking::Body;
+use reqwest::blocking::multipart::Part;
+use reqwest::header::HeaderMap;
+use serenity::builder::*;
+use serenity::interactions_endpoint::Verifier;
+use serenity::json;
+use serenity::model::application::*;
+
+type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
+
+fn handle_command(interaction: CommandInteraction) -> CreateInteractionResponse {
+    let interaction_token = interaction.token.to_owned();
+    let interaction_id = interaction.id.to_string();
+
+    std::thread::spawn(move || {
+        println!("waiting ...");
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        // follow_up(interaction_token.as_str(), interaction_id.as_str(), application_id.as_str());
+        println!("callback ...");
+        callback(&interaction_id, &interaction_token);
+    });
+
+    // std::thread::sleep(std::time::Duration::from_secs(10));
+    CreateInteractionResponse::Defer(CreateInteractionResponseMessage::new().content("Hey"))
+}
+
+fn handle_request(
+    mut request: tiny_http::Request,
+    body: &mut Vec<u8>,
+    verifier: &Verifier,
+) -> Result<(), Error> {
+    println!("Received request from {:?}", request.remote_addr());
+
+    // Read the request body (containing the interaction JSON)
+    body.clear();
+    request.as_reader().read_to_end(body)?;
+
+    // Reject request if it fails cryptographic verification
+    // Discord rejects the interaction endpoints URL if this check is not done
+    // (This part is very specific to your HTTP server crate of choice, so serenity cannot abstract
+    // away the boilerplate)
+    let find_header =
+        |name| Some(request.headers().iter().find(|h| h.field.equiv(name))?.value.as_str());
+    let signature = find_header("X-Signature-Ed25519").ok_or("missing signature header")?;
+    let timestamp = find_header("X-Signature-Timestamp").ok_or("missing timestamp header")?;
+    if verifier.verify(signature, timestamp, body).is_err() {
+        request.respond(tiny_http::Response::empty(401))?;
+        return Ok(());
+    }
+
+    // Build Discord response
+    let response = match json::from_slice::<Interaction>(body)? {
+        // Discord rejects the interaction endpoints URL if pings are not acknowledged
+        Interaction::Ping(_) => CreateInteractionResponse::Pong,
+        Interaction::Command(interaction) => handle_command(interaction),
+        _ => return Ok(()),
+    };
+
+    let resp = tiny_http::Response::from_data(json::to_vec(&response)?)
+        .with_header("Content-Type: application/json".parse::<tiny_http::Header>().unwrap());
+
+    println!("response ...");
+    let resp = tiny_http::Response::empty(204);
+
+    // Send the Discord response back via HTTP
+    request.respond(
+        resp,
+    )?;
+
+    Ok(())
+}
+
+fn main() -> Result<(), Error> {
+    // Change this string to the Public Key value in your bot dashboard
+    let verifier =
+        Verifier::new("7d2b7d9084b7dafe913a2b86f88e12f42d99dfacb49420c47cb51455edfa6dcd");
+
+    // Setup an HTTP server and listen for incoming interaction requests
+    // Choose any port here (but be consistent with the interactions endpoint URL in your bot
+    // dashboard)
+    let server = tiny_http::Server::http("0.0.0.0:8787")?;
+    let mut body = Vec::new();
+    loop {
+        let request = server.recv()?;
+        if let Err(e) = handle_request(request, &mut body, &verifier) {
+            eprintln!("Error while handling request: {e}");
+        }
+    }
+}
+
+fn callback(id: &str, token: &str) {
+    let base = "https://discord.com/api/v10";
+    let post = format!("{base}/interactions/{id}/{token}/callback");
+    
+    let response = reqwest::blocking::Client::new()
+        .post(post)
+        .header("Content-Type", "application/json")
+        .body(r#"{"type": 4, "data": {"content": "callback content"}}"#)
+        .send()
+        .unwrap()
+        .text()
+        .unwrap();
+    
+    println!("{response}")
+}
+
+fn follow_up(interaction_token: &str, interaction_id: &str, application_id: &str) {
+    let base = "https://discord.com/api/v10";
+
+    let patch = format!("{}/webhooks/{}/{}/messages/@original", base, application_id, interaction_token);
+    let post = format!("{}/webhooks/{}/{}", base, application_id, interaction_token);
+
+    let create_message_body = r#"{"content": "Congrats on sending your command!", "attachments": [{"id": 0, "description": "imagea of reyna valorant", "url": "https://cdn.discordapp.com/attachments/542675523583737856/1328679245966479371/reyna.png?ex=67879479&is=678642f9&hm=36e37484a7aa7572f7242c58885dd552d63276a9f864d4d237b6bf67c4d5ad58&"}]}"#;
+    let create_message_body = r#"{"content": "Congrats on sending your command!", "attachments": [{"id": 0, "description": "imagea of reyna valorant", "url": "wtf"}]}"#;
+
+    //
+    let file_path = "/home/stnwtr/Downloads/reyna.png";
+    let form = reqwest::blocking::multipart::Form::new()
+        .part("payload_json", Part::text(create_message_body).mime_str("application/json").unwrap())
+        .part("files[0]", Part::file(file_path).unwrap());
+    // 
+
+    let response = reqwest::blocking::Client::new()
+        .patch(patch)
+        .multipart(form)
+        .timeout(Duration::from_secs(1))
+        .send()
+        .unwrap();
+
+    println!("Response: {}", response.text().unwrap());
+}
 // // //
 // // // // use axum_extra::TypedHeader;
 // // // // use ed25519_dalek::{Signature, Verifier, VerifyingKey};
