@@ -29,5 +29,15 @@ Folgender Befehl fügt den Slash-Command dem Client hinzu wobei der Body das JSO
 ```shell
 curl https://discord.com/api/v10/applications/<client_id>/commands \
     -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
     -d '<befehl>'
+```
+
+Alternativ auch mit einer Datei statt des Befehls direkt.
+
+```shell
+curl https://discord.com/api/v10/applications/<client_id>/commands \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -d @file
 ```
