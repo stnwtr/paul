@@ -140,8 +140,8 @@ fn verify(signature: &HeaderValue, timestamp: &HeaderValue, body: &str) -> bool 
 #[tokio::main]
 async fn main() {
     let listener = TcpListener::bind("0.0.0.0:8787").await.unwrap();
-
     let router = Router::new().route("/", post(handler));
 
+    println!("Starting server on 0.0.0.0:8787");
     serve(listener, router).await.unwrap();
 }
