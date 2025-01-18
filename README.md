@@ -1,6 +1,6 @@
 # Paul
 
-Discord-Interaction-Handler für `/agent` und `/waffe`, welche einen zufälligen Agenten bzw. eine zufällige Waffe für Valorant vorschlagen.
+Discord-Interaction-Handler für `/agent`, `/weapon` und `/armor`, welche einen zufälligen Agenten, eine zufällige Waffe oder ein zufälliges Rüstungsteil für Valorant vorschlagen.
 
 ## Befehl registrieren
 
@@ -17,18 +17,19 @@ Wichtige Variablen:
 Mit folgendem Befehl wird ein Bearer-Token angefordert, welcher es erlaubt, Befehle hinzuzufügen und zu verwalten.
 
 ```shell
-curl https://discord.com/api/oauth2/token \
-    -d client_id=<client_id> \
-    -d client_secret=<client_secret> \
+curl -X POST https://discord.com/api/oauth2/token \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d client_id=$CLIENT_ID \
+    -d client_secret=$CLIENT_SECRET \
     -d grant_type=client_credentials \
-    -d scope=application.commands.update
+    -d scope=applications.commands.update
 ```
 
 Folgender Befehl fügt den Slash-Command dem Client hinzu wobei der Body das JSON-Objekt des Slash-Commands ist.
 
 ```shell
-curl https://discord.com/api/v10/applications/<client_id>/commands \
-    -H "Authorization: Bearer <token>" \
+curl -X POST https://discord.com/api/v10/applications/$CLIENT_ID/commands \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
     -H "Content-Type: application/json" \
     -d '<befehl>'
 ```
@@ -36,8 +37,8 @@ curl https://discord.com/api/v10/applications/<client_id>/commands \
 Alternativ auch mit einer Datei statt des Befehls direkt.
 
 ```shell
-curl https://discord.com/api/v10/applications/<client_id>/commands \
-    -H "Authorization: Bearer <token>" \
+curl -X POST https://discord.com/api/v10/applications/$CLIENT_ID/commands \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
     -H "Content-Type: application/json" \
     -d @file
 ```

@@ -3,8 +3,7 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::post;
 use axum::{serve, Json, Router};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH};
-use rand::prelude::SliceRandom;
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use reqwest::multipart::{Form, Part};
 use reqwest::Client;
 use serde_json::{json, Value};
@@ -12,69 +11,75 @@ use tokio::net::TcpListener;
 
 const PUBLIC_KEY: &str = "7d2b7d9084b7dafe913a2b86f88e12f42d99dfacb49420c47cb51455edfa6dcd";
 
-const AGENTS: &[(&str, &str)] = &[
-    ("Astra", "astra"),
-    ("Breach", "breach"),
-    ("Brimstone", "brimstone"),
-    ("Chamber", "chamber"),
-    ("Clove", "clove"),
-    ("Cypher", "cypher"),
-    ("Deadlock", "deadlock"),
-    ("Fade", "fade"),
-    ("Gekko", "gekko"),
-    ("Harbor", "harbor"),
-    ("Iso", "iso"),
-    ("Jett", "jett"),
-    ("KAY/O", "kayo"),
-    ("Killjoy", "killjoy"),
-    ("Neon", "neon"),
-    ("Omen", "omen"),
-    ("Phoenix", "phoenix"),
-    ("Raze", "raze"),
-    ("Reyna", "reyna"),
-    ("Sage", "sage"),
-    ("Skye", "skye"),
-    ("Sova", "sova"),
-    ("Tejo", "tejo"),
-    ("Viper", "viper"),
-    ("Vyse", "vyse"),
-    ("Yoru", "yoru"),
+const AGENTS: &[(&str, &str, &[u8])] = &[
+    ("Astra", "astra.png", include_bytes!("../images/agents/astra.png")),
+    ("Breach", "breach.png", include_bytes!("../images/agents/breach.png")),
+    ("Brimstone", "brimstone.png", include_bytes!("../images/agents/brimstone.png")),
+    ("Chamber", "chamber.png", include_bytes!("../images/agents/chamber.png")),
+    ("Clove", "clove.png", include_bytes!("../images/agents/clove.png")),
+    ("Cypher", "cypher.png", include_bytes!("../images/agents/cypher.png")),
+    ("Deadlock", "deadlock.png", include_bytes!("../images/agents/deadlock.png")),
+    ("Fade", "fade.png", include_bytes!("../images/agents/fade.png")),
+    ("Gekko", "gekko.png", include_bytes!("../images/agents/gekko.png")),
+    ("Harbor", "harbor.png", include_bytes!("../images/agents/harbor.png")),
+    ("Iso", "iso.png", include_bytes!("../images/agents/iso.png")),
+    ("Jett", "jett.png", include_bytes!("../images/agents/jett.png")),
+    ("KAY/O", "kayo.png", include_bytes!("../images/agents/kayo.png")),
+    ("Killjoy", "killjoy.png", include_bytes!("../images/agents/killjoy.png")),
+    ("Neon", "neon.png", include_bytes!("../images/agents/neon.png")),
+    ("Omen", "omen.png", include_bytes!("../images/agents/omen.png")),
+    ("Phoenix", "phoenix.png", include_bytes!("../images/agents/phoenix.png")),
+    ("Raze", "raze.png", include_bytes!("../images/agents/raze.png")),
+    ("Reyna", "reyna.png", include_bytes!("../images/agents/reyna.png")),
+    ("Sage", "sage.png", include_bytes!("../images/agents/sage.png")),
+    ("Skye", "skye.png", include_bytes!("../images/agents/skye.png")),
+    ("Sova", "sova.png", include_bytes!("../images/agents/sova.png")),
+    ("Tejo", "tejo.png", include_bytes!("../images/agents/tejo.png")),
+    ("Viper", "viper.png", include_bytes!("../images/agents/viper.png")),
+    ("Vyse", "vyse.png", include_bytes!("../images/agents/vyse.png")),
+    ("Yoru", "yoru.png", include_bytes!("../images/agents/yoru.png")),
 ];
 
-const WEAPONS: &[(&str, &str)] = &[
-    ("Ares", "ares"),
-    ("Bucky", "bucky"),
-    ("Bulldog", "bulldog"),
-    ("Classic", "classic"),
-    ("Frenzy", "frenzy"),
-    ("Ghost", "ghost"),
-    ("Guardian", "guardian"),
-    ("Judge", "judge"),
-    ("Knife", "knife"),
-    ("Marshal", "marshal"),
-    ("Odin", "odin"),
-    ("Operator", "operator"),
-    ("Outlaw", "outlaw"),
-    ("Phantom", "phantom"),
-    ("Sheriff", "sheriff"),
-    ("Shorty", "shorty"),
-    ("Spectre", "spectre"),
-    ("Stinger", "stinger"),
-    ("Vandal", "vandal"),
+const WEAPONS: &[(&str, &str, &[u8])] = &[
+    ("Ares", "ares.png", include_bytes!("../images/weapons/ares.png")),
+    ("Bucky", "bucky.png", include_bytes!("../images/weapons/bucky.png")),
+    ("Bulldog", "bulldog.png", include_bytes!("../images/weapons/bulldog.png")),
+    ("Classic", "classic.png", include_bytes!("../images/weapons/classic.png")),
+    ("Frenzy", "frenzy.png", include_bytes!("../images/weapons/frenzy.png")),
+    ("Ghost", "ghost.png", include_bytes!("../images/weapons/ghost.png")),
+    ("Guardian", "guardian.png", include_bytes!("../images/weapons/guardian.png")),
+    ("Judge", "judge.png", include_bytes!("../images/weapons/judge.png")),
+    ("Knife", "knife.png", include_bytes!("../images/weapons/knife.png")),
+    ("Marshal", "marshal.png", include_bytes!("../images/weapons/marshal.png")),
+    ("Odin", "odin.png", include_bytes!("../images/weapons/odin.png")),
+    ("Operator", "operator.png", include_bytes!("../images/weapons/operator.png")),
+    ("Outlaw", "outlaw.png", include_bytes!("../images/weapons/outlaw.png")),
+    ("Phantom", "phantom.png", include_bytes!("../images/weapons/phantom.png")),
+    ("Sheriff", "sheriff.png", include_bytes!("../images/weapons/sheriff.png")),
+    ("Shorty", "shorty.png", include_bytes!("../images/weapons/shorty.png")),
+    ("Spectre", "spectre.png", include_bytes!("../images/weapons/spectre.png")),
+    ("Stinger", "stinger.png", include_bytes!("../images/weapons/stinger.png")),
+    ("Vandal", "vandal.png", include_bytes!("../images/weapons/vandal.png")),
 ];
 
-const ARMOR: &[(&str, &str)] = &[
-    ("Light Armor", "light"),
-    ("Regen Heavy Armor", "heavy"),
-    ("Regen Shield", "regen"),
+const ARMOR: &[(&str, &str, &[u8])] = &[
+    ("Light Armor", "light.png", include_bytes!("../images/armor/light.png")),
+    ("Regen Heavy Armor", "heavy.png", include_bytes!("../images/armor/heavy.png")),
+    ("Regen Shield", "regen.png", include_bytes!("../images/armor/regen.png")),
 ];
 
 async fn handle_interaction(interaction: Value) {
+    let command = interaction["data"]["name"].as_str().unwrap();
     let application_id = interaction["application_id"].as_str().unwrap();
     let interaction_token = interaction["token"].as_str().unwrap();
+    let username = interaction["member"]["user"]["username"].as_str().unwrap();
 
-    let (_agent_name, file_name) = AGENTS.choose(&mut thread_rng()).unwrap();
-    let file_path = format!("/home/stnwtr/Downloads/paul/{}.png", file_name);
+    let (item_name, file_name, file_content) = match command {
+        "agent" => AGENTS[thread_rng().gen_range(0..AGENTS.len())],
+        "weapon" => WEAPONS[thread_rng().gen_range(0..WEAPONS.len())],
+        "armor" => ARMOR[thread_rng().gen_range(0..ARMOR.len())],
+        _ => panic!("Unknown command."),
+    };
 
     let url = format!(
         "https://discord.com/api/v10/webhooks/{}/{}/messages/@original",
@@ -90,8 +95,10 @@ async fn handle_interaction(interaction: Value) {
         )
         .part(
             "files[0]",
-            Part::file(file_path).await.unwrap().file_name("reyna.png"),
+            Part::bytes(file_content).mime_str("image/png").unwrap().file_name(file_name),
         );
+
+    println!("{} got {}.", username, item_name);
 
     Client::new()
         .patch(url)
