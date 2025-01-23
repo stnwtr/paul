@@ -42,3 +42,16 @@ curl -X POST https://discord.com/api/v10/applications/$CLIENT_ID/commands \
     -H "Content-Type: application/json" \
     -d @file
 ```
+
+## Todo
+
+- Eventuell nicht alles hartkodieren, environment nutzen.
+- Bilder nicht von [Valorant-API](https://valorant-api.com) klauen sondern selbst machen. (?)
+- Kein `include_bytes!` verwenden, sondern Bilder beim 1. mal laden und cachen.
+- Git actions?
+- Refactoring.
+- Hoffen, dass ich keinen Token commited habe.
+- Axum & Tokio sind sehr heavy, wenn ich schon auf serenity verzichte.
+- Möglich, direkt in der response das image senden? Keine Ahnung. Never change a running system.
+- Slash commands nicht manuell erstellen sondern via code.
+- Mehr metadaten füllen, nicht nur das mindeste?
